@@ -99,7 +99,8 @@ const Dashboard = ({ uploadResult }) => {
     };
 
     const downloadReport = () => {
-        window.open(`http://localhost:8000/download-report/${companyId}`, '_blank');
+        const apiBase = import.meta.env.VITE_API_URL || "http://localhost:8000";
+        window.open(`${apiBase}/download-report/${companyId}`, '_blank');
     };
 
     if (loading) return <div className="loading">{t.loading}</div>;
