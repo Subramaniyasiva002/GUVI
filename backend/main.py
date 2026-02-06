@@ -16,11 +16,12 @@ load_dotenv()
 # Create Tables (Simple migration for MVP)
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="SME Financial Health Assessment API")
+# Get allowed origins from environment variable
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

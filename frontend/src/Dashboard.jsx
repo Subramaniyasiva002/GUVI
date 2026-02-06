@@ -75,7 +75,8 @@ const Dashboard = ({ uploadResult }) => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`http://localhost:8000/analyze/${companyId}?language=${language}`, {
+            const apiBase = import.meta.env.VITE_API_URL || "http://localhost:8000";
+            const response = await fetch(`${apiBase}/analyze/${companyId}?language=${language}`, {
                 method: 'POST'
             });
 
