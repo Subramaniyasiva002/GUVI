@@ -44,7 +44,7 @@ records = [
     {'date': '2023-10-01', 'category': 'Sales Revenue', 'amount': 50000.0, 'type': 'Revenue'},
     {'date': '2023-10-02', 'category': 'Office Rent', 'amount': 15000.0, 'type': 'Expense'},
     {'date': '2023-10-03', 'category': 'Salaries', 'amount': 30000.0, 'type': 'Expense'},
-    # ... all rows
+    # .. all rows
 ]
 ```
 
