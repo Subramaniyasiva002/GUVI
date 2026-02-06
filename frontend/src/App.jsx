@@ -6,6 +6,7 @@ import FileUpload from './FileUpload'
 function App() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [uploadResult, setUploadResult] = useState(null);
+  const [language, setLanguage] = useState('en');
 
   const handleUploadSuccess = (result) => {
     setUploadResult(result);
@@ -21,11 +22,16 @@ function App() {
       <main className="app-main">
         <section className="upload-section">
           <h2>Upload Financial Documents</h2>
-          <FileUpload onUploadSuccess={handleUploadSuccess} />
+          <FileUpload onUploadSuccess={handleUploadSuccess} language={language} />
         </section>
         <section className="dashboard-section">
           <h2>Financial Dashboard</h2>
-          <Dashboard key={refreshTrigger} uploadResult={uploadResult} />
+          <Dashboard
+            key={refreshTrigger}
+            uploadResult={uploadResult}
+            language={language}
+            setLanguage={setLanguage}
+          />
         </section>
       </main>
     </div>

@@ -1,6 +1,13 @@
 import { useState } from 'react';
 
-const FileUpload = ({ onUploadSuccess }) => {
+const TRANSLATIONS = {
+    en: { uploadSection: "Upload Financial Documents" },
+    hi: { uploadSection: "वित्तीय दस्तावेज़ अपलोड करें" },
+    ta: { uploadSection: "நிதி ஆவணங்களை பதிவேற்றவும்" }
+};
+
+const FileUpload = ({ onUploadSuccess, language = 'en' }) => {
+    const t = TRANSLATIONS[language] || TRANSLATIONS.en;
     const [file, setFile] = useState(null);
     const [status, setStatus] = useState('');
     const [uploading, setUploading] = useState(false);
@@ -52,13 +59,40 @@ const FileUpload = ({ onUploadSuccess }) => {
         }
     };
 
+    const resetDatabase = async () => {
+        if (!window.confirm("This will delete ALL data. Are you sure?")) return;
+
+        try {
+            const apiBase = import.meta.env.VITE_API_URL || "http://localhost:8000";
+            const response = await fetch(`${apiBase}/reset-db`, { method: 'POST' });
+            if (response.ok) {
+                alert("Database reset! You can now upload new files.");
+                window.location.reload();
+            }
+        } catch (err) {
+            alert("Reset failed: " + err.message);
+        }
+    };
+
     return (
         <div className="file-upload">
-            <input type="file" accept=".csv,.xlsx" onChange={handleFileChange} />
-            <button onClick={handleUpload} disabled={!file || uploading}>
-                {uploading ? 'Uploading...' : 'Upload Data'}
-            </button>
-            {status && <p className="status-message">{status}</p>}
+            <h3>{t.uploadSection}</h3>
+            <div className="upload-box">
+                <input type="file" onChange={handleFileChange} accept=".csv,.xlsx" />
+                <button onClick={handleUpload} disabled={!file || uploading}>
+                    {uploading ? 'Processing...' : 'Analyze Now'}
+                </button>
+            </div>
+            {status && <p className="status-msg">{status}</p>}
+
+            <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '10px' }}>
+                <button
+                    onClick={resetDatabase}
+                    style={{ backgroundColor: '#ff4444', color: 'white', border: 'none', borderRadius: '4px', padding: '8px 12px', cursor: 'pointer' }}
+                >
+                    🗑️ Reset Demo Data
+                </button>
+            </div>
         </div>
     );
 };

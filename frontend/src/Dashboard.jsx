@@ -15,6 +15,10 @@ const TRANSLATIONS = {
         assessment: "Assessment",
         recommendations: "Recommendations",
         languageNotice: "Select language before loading analysis for results in your preferred language",
+        summarySection: "Financial Summary",
+        totalRevenue: "Total Revenue",
+        totalExpenses: "Total Expenses",
+        netIncome: "Net Income",
     },
     hi: {
         title: "लघु एवं मध्यम उद्यम वित्तीय स्वास्थ्य मंच",
@@ -30,6 +34,10 @@ const TRANSLATIONS = {
         assessment: "मूल्यांकन",
         recommendations: "सिफारिशें",
         languageNotice: "अपनी पसंदीदा भाषा में परिणाम के लिए विश्लेषण लोड करने से पहले भाषा चुनें",
+        summarySection: "वित्तीय सारांश",
+        totalRevenue: "कुल राजस्व",
+        totalExpenses: "कुल खर्च",
+        netIncome: "शुद्ध आय",
     },
     ta: {
         title: "சிறு மற்றும் நடுத்தர நிறுவன நிதி சுகாதார தளம்",
@@ -45,17 +53,21 @@ const TRANSLATIONS = {
         assessment: "மதிப்பீடு",
         recommendations: "பரிந்துரைகள்",
         languageNotice: "உங்கள் விருப்பமான மொழியில் முடிவுகளுக்கு பகுப்பாய்வை ஏற்றுவதற்கு முன் மொழியைத் தேர்ந்தெடுக்கவும்",
+        summarySection: "நிதிச் சுருக்கம்",
+        totalRevenue: "மொத்த வருவாய்",
+        totalExpenses: "மொத்த செலவுகள்",
+        netIncome: "நிகர வருமானம்",
     }
 };
 
-const Dashboard = ({ uploadResult }) => {
+const Dashboard = ({ uploadResult, language, setLanguage }) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [companyId, setCompanyId] = useState(1);
-    const [language, setLanguage] = useState('en');
+    // language state moved to App.jsx
 
-    const t = TRANSLATIONS[language];
+    const t = TRANSLATIONS[language] || TRANSLATIONS.en;
 
     // Auto-load assessment if duplicate file was uploaded
     useEffect(() => {
@@ -131,6 +143,21 @@ const Dashboard = ({ uploadResult }) => {
     return (
         <div className="dashboard">
             <h3>{t.assessment} for {company} <span style={{ fontSize: '0.8em', color: '#666' }}>({language === 'en' ? 'English' : language === 'hi' ? 'हिंदी' : 'தமிழ்'})</span></h3>
+
+            <div className="summary-boxes">
+                <div className="summary-card revenue-card">
+                    <h5>{t.totalRevenue}</h5>
+                    <h3>₹{data.summary?.total_revenue?.toLocaleString() || "0"}</h3>
+                </div>
+                <div className="summary-card expense-card">
+                    <h5>{t.totalExpenses}</h5>
+                    <h3>₹{data.summary?.total_expense?.toLocaleString() || "0"}</h3>
+                </div>
+                <div className="summary-card net-card">
+                    <h5>{t.netIncome}</h5>
+                    <h3>₹{data.summary?.net_income?.toLocaleString() || "0"}</h3>
+                </div>
+            </div>
 
             <div className="score-card">
                 <h4>{t.score}</h4>

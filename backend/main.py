@@ -150,8 +150,18 @@ def analyze_company_health(company_id: int, language: str = "en", db: Session = 
     db.commit()
     db.refresh(db_assessment)
     
+    # Calculate summary values for display
+    total_revenue = sum(r.amount for r in records if r.record_type == 'Revenue')
+    total_expense = sum(r.amount for r in records if r.record_type == 'Expense')
+    net_income = total_revenue - total_expense
+
     return {
         "company": company.name,
+        "summary": {
+            "total_revenue": total_revenue,
+            "total_expense": total_expense,
+            "net_income": net_income
+        },
         "assessment": {
             "score": db_assessment.overall_score,
             "risk_level": db_assessment.risk_level,
@@ -208,3 +218,21 @@ def download_report(company_id: int, db: Session = Depends(get_db)):
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename=financial_report_{company.name.replace(' ', '_')}.pdf"}
     )
+
+@app.post("/reset-db")
+def reset_database(db: Session = Depends(get_db)):
+    """Developer endpoint to reset the database for demo purposes"""
+    try:
+        from database import engine, Base
+        # We need to dispose the engine to close active connections before dropping
+        engine.dispose()
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
+        return {"message": "Database reset successfully"}
+    except Exception as e:
+        print(f"Reset error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
