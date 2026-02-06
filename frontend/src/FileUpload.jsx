@@ -80,12 +80,12 @@ const FileUpload = ({ onUploadSuccess, language = 'en' }) => {
             <div className="upload-box">
                 <input type="file" onChange={handleFileChange} accept=".csv,.xlsx" />
                 <button onClick={handleUpload} disabled={!file || uploading}>
-                    {uploading ? 'Processing...' : 'Analyze Now'}
+                    {uploading ? 'Processing...' : 'Process Now'}
                 </button>
             </div>
             {status && <p className="status-msg">{status}</p>}
 
-            <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '10px' }}>
+            <div>
                 <button
                     onClick={resetDatabase}
                     style={{ backgroundColor: '#ff4444', color: 'white', border: 'none', borderRadius: '4px', padding: '8px 12px', cursor: 'pointer' }}
