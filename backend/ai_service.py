@@ -96,33 +96,57 @@ IMPORTANT: Respond ONLY in {lang_name}. Provide JSON with these exact keys:
                 "narrative": "Could not generate assessment due to an API error."
             }
         
-        # Try to parse JSON from response
+        # Aggressive JSON extraction
         import json
+        import re
+        
         try:
-            # Clean markdown code blocks if present
+            # 1. Try to find JSON block in markdown
             cleaned = response_content.strip()
-            if cleaned.startswith('```'):
-                cleaned = cleaned.split('```')[1]
-                if cleaned.startswith('json'):
-                    cleaned = cleaned[4:]
-            cleaned = cleaned.strip()
+            json_match = re.search(r'\{.*\}', cleaned, re.DOTALL)
+            
+            if json_match:
+                cleaned = json_match.group(0)
             
             parsed = json.loads(cleaned)
             
-            # Ensure all required fields exist
-            if 'score' not in parsed:
-                parsed['score'] = 'N/A'
-            if 'risk_level' not in parsed:
-                parsed['risk_level'] = 'Unknown'
-            if 'narrative' not in parsed:
-                parsed['narrative'] = cleaned
-            if 'recommendations' not in parsed:
-                parsed['recommendations'] = []
-                
-            return parsed
+            # 2. Flatten nested response if necessary
+            if isinstance(parsed, dict):
+                # Handle cases where model wraps everything in a top-level key
+                for nested_key in ['assessment', 'financial_assessment', 'result', 'analysis', 'data']:
+                    if nested_key in parsed and isinstance(parsed[nested_key], dict):
+                        parsed = parsed[nested_key]
+                        break
             
-        except json.JSONDecodeError:
-            # Fallback if JSON parsing fails
+            # 3. Normalize keys with flexible mapping
+            def get_val(keys, default=""):
+                for k in keys:
+                    if k in parsed: return parsed[k]
+                return default
+
+            result = {
+                "score": get_val(['score', 'health_score', 'overall_score', 'financial_health_score'], "N/A"),
+                "risk_level": get_val(['risk_level', 'risk', 'risk_assessment', 'risk_category'], "Unknown"),
+                "narrative": get_val(['narrative', 'assessment', 'summary', 'analysis', 'detailed_assessment'], ""),
+                "recommendations": get_val(['recommendations', 'tips', 'action_items', 'suggestions'], [])
+            }
+            
+            # 4. Final Cleanup: If narrative is empty, use the whole original string (sanitized)
+            if not result['narrative'] or len(str(result['narrative'])) < 10:
+                # If we couldn't find a narrative but found other keys, 
+                # maybe the AI put the narrative in a non-standard key
+                potential_narrative = ""
+                for k, v in parsed.items():
+                    if isinstance(v, str) and len(v) > 50 and k not in ['risk_level', 'score']:
+                        potential_narrative = v
+                        break
+                result['narrative'] = potential_narrative or "Assessment generated successfully."
+                
+            return result
+            
+        except (json.JSONDecodeError, Exception) as e:
+            print(f"⚠️ JSON Parse Attempt Failed: {e}")
+            # Mega fallback: Return the raw content in narrative so at least something shows
             return {
                 "score": "N/A",
                 "risk_level": "Unknown",

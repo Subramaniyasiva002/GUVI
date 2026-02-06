@@ -123,19 +123,43 @@ def analyze_company_health(company_id: int, language: str = "en", db: Session = 
     # Generate assessment in specified language
     assessment_data = generate_financial_assessment(data_for_ai, language=language)
     
+    # Extract score safely
+    raw_score = assessment_data.get('score', 0)
+    score_val = 0.0
+    try:
+        if isinstance(raw_score, (int, float)):
+            score_val = float(raw_score)
+        else:
+            # Try to extract the first number from string (e.g. "85/100" -> 85)
+            import re
+            match = re.search(r"(\d+\.?\d*)", str(raw_score))
+            if match:
+                score_val = float(match.group(1))
+    except (ValueError, TypeError):
+        score_val = 0.0
+
     # Store assessment in database for consistency
     db_assessment = Assessment(
         company_id=company.id,
-        overall_score=float(assessment_data.get('score', 0)) if str(assessment_data.get('score', 'N/A')).replace('.','').isdigit() else 0,
-        risk_level=assessment_data.get('risk_level', 'Unknown'),
-        summary_narrative=assessment_data.get('narrative', ''),
+        overall_score=score_val,
+        risk_level=str(assessment_data.get('risk_level', 'Unknown')),
+        summary_narrative=str(assessment_data.get('narrative', '')),
         recommendations=assessment_data.get('recommendations', [])
     )
     db.add(db_assessment)
     db.commit()
     db.refresh(db_assessment)
     
-    return {"company": company.name, "assessment": assessment_data, "assessment_id": db_assessment.id}
+    return {
+        "company": company.name,
+        "assessment": {
+            "score": db_assessment.overall_score,
+            "risk_level": db_assessment.risk_level,
+            "narrative": db_assessment.summary_narrative,
+            "recommendations": db_assessment.recommendations
+        },
+        "assessment_id": db_assessment.id
+    }
 
 @app.get("/download-report/{company_id}")
 def download_report(company_id: int, db: Session = Depends(get_db)):

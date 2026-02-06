@@ -119,23 +119,13 @@ const Dashboard = ({ uploadResult }) => {
 
     const { company, assessment } = data;
 
-    let parsedAssessment = {};
-    if (!assessment) {
-        return <div className="error">No assessment data received</div>;
-    }
-    if (assessment.error) {
-        return <div className="error">AI Error: {assessment.error}</div>;
-    }
-    if (typeof assessment === 'object' && assessment.score !== undefined) {
-        parsedAssessment = assessment;
-    } else {
-        parsedAssessment = {
-            score: "N/A",
-            risk_level: "Unknown",
-            narrative: JSON.stringify(assessment),
-            recommendations: []
-        };
-    }
+    // Use the assessment object directly as it is now guaranteed to be flat from the backend
+    const parsedAssessment = assessment || {
+        score: "N/A",
+        risk_level: "Unknown",
+        narrative: "No assessment available",
+        recommendations: []
+    };
 
     return (
         <div className="dashboard">
