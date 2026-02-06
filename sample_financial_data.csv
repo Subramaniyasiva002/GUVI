@@ -1,0 +1,15 @@
+date,category,amount,type
+2023-10-01,Sales Revenue,50000,Revenue
+2023-10-02,Office Rent,2500,Expense
+2023-10-05,Raw Materials,12000,Expense
+2023-10-10,Consulting Fees,8000,Revenue
+2023-10-15,Utilities,800,Expense
+2023-10-20,Employee Salaries,15000,Expense
+2023-10-25,Marketing Campaign,3000,Expense
+2023-11-01,Sales Revenue,55000,Revenue
+2023-11-02,Office Rent,2500,Expense
+2023-11-05,Software Subscriptions,500,Expense
+2023-11-12,Inventory Purchase,10000,Expense
+2023-11-20,Employee Salaries,15000,Expense
+2023-12-01,Sales Revenue,62000,Revenue
+2023-12-10,Year End Bonus,5000,Expense
