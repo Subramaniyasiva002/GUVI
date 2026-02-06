@@ -12,6 +12,7 @@ import os
 import traceback
 
 load_dotenv()
+app = FastAPI(title="SME Financial Health Assessment Platform API")
 
 # Create Tables (Simple migration for MVP)
 Base.metadata.create_all(bind=engine)
